@@ -1,4 +1,8 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:image/image.dart' as img; 
+import '../Camara/Camara.dart';
+import 'dart:convert';
 
 class DocumentoDeIdentidad extends StatefulWidget {
   @override
@@ -7,6 +11,10 @@ class DocumentoDeIdentidad extends StatefulWidget {
 
 class _DocumentoDeIdentidadState extends State<DocumentoDeIdentidad> {
   DateTime? _selectedDate;
+  String? _frontalImageBase64;
+  String? _traseraImageBase64;
+  String? _numeroCedula;
+  String? _fechaExpedicion;
 
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? pickedDate = await showDatePicker(
@@ -21,6 +29,26 @@ class _DocumentoDeIdentidadState extends State<DocumentoDeIdentidad> {
       });
     }
   }
+
+  File _rotateImage(File imageFile) {
+    final image = img.decodeImage(imageFile.readAsBytesSync())!;
+    final rotatedImage = img.copyRotate(image, 90);
+    return File(imageFile.path)..writeAsBytesSync(img.encodeJpg(rotatedImage));
+  }
+
+  Future<void> _convertAndSetFrontalImage(File imageFile, {required bool isFrontal}) async {
+  List<int> imageBytes = await imageFile.readAsBytes();
+  String base64Image = base64Encode(imageBytes);
+  setState(() {
+    if (isFrontal) {
+      _frontalImageBase64 = base64Image;
+    } else {
+      _traseraImageBase64 = base64Image;
+    }
+  });
+  print(isFrontal ? 'Imagen frontal en base64: $_frontalImageBase64' : 'Imagen trasera en base64: $_traseraImageBase64');
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -54,14 +82,29 @@ class _DocumentoDeIdentidadState extends State<DocumentoDeIdentidad> {
             SizedBox(height: 15),
             Container(
               width: 150,
-              height: 100,
+              height: 90,
               color: Colors.grey[200],
-              child: Image.asset('assets/cedulaFrontal.png'),
+              child: _frontalImageBase64 != null
+                  ? Transform.rotate(
+                      angle: 90 * 3.1415926535897932 / 180,
+                      child: Image.memory(
+                        base64Decode(_frontalImageBase64!),
+                      ),
+                    )
+                  : Image.asset('assets/cedulaFrontal.png'),
             ),
             SizedBox(height: 5),
             ElevatedButton(
-              onPressed: () {
-                // Acción para añadir la imagen de la cédula frontal
+              onPressed: () async {
+                final imagePath = await Navigator.push<String>(
+                  context,
+                  MaterialPageRoute(builder: (context) => Camera()),
+                );
+                if (imagePath != null) {
+                  File rotatedImage = _rotateImage(File(imagePath));
+                  await _convertAndSetFrontalImage(rotatedImage,
+                      isFrontal: true); // Para la imagen frontal
+                }
               },
               style: ElevatedButton.styleFrom(
                 primary: Colors.green[900],
@@ -84,14 +127,29 @@ class _DocumentoDeIdentidadState extends State<DocumentoDeIdentidad> {
             SizedBox(height: 15),
             Container(
               width: 150,
-              height: 100,
+              height: 90,
               color: Colors.grey[200],
-              child: Image.asset('assets/cedulaTrasera.png'),
+              child: _traseraImageBase64 != null
+                  ? Transform.rotate(
+                      angle: 90 * 3.1415926535897932 / 180,
+                      child: Image.memory(
+                        base64Decode(_traseraImageBase64!),
+                      ),
+                    )
+                  : Image.asset('assets/cedulaTrasera.png'),
             ),
             SizedBox(height: 5),
             ElevatedButton(
-              onPressed: () {
-                // Acción para añadir la imagen de la cédula trasera
+              onPressed: () async {
+                final imagePath = await Navigator.push<String>(
+                  context,
+                  MaterialPageRoute(builder: (context) => Camera()),
+                );
+                if (imagePath != null) {
+                  File rotatedImage = _rotateImage(File(imagePath));
+                  await _convertAndSetFrontalImage(rotatedImage,
+                      isFrontal: false); // Para la imagen trasera
+                }
               },
               style: ElevatedButton.styleFrom(
                 primary: Colors.green[900],
@@ -112,7 +170,7 @@ class _DocumentoDeIdentidadState extends State<DocumentoDeIdentidad> {
           width: double.infinity,
           child: ElevatedButton(
             onPressed: () {
-              // Acción para guardar los datos
+              _saveFormData();// Acción para guardar los datos
             },
             style: ElevatedButton.styleFrom(
               primary: Colors.green[900],
@@ -146,9 +204,16 @@ class _DocumentoDeIdentidadState extends State<DocumentoDeIdentidad> {
           ),
           SizedBox(height: 5),
           TextFormField(
+            onChanged: (value) {
+              setState(() {
+                _numeroCedula = value;
+                print('Número de cédula: $_numeroCedula');
+              });
+            },
             decoration: InputDecoration(
               border: OutlineInputBorder(),
-              contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 12),
+              contentPadding:
+                  EdgeInsets.symmetric(vertical: 15, horizontal: 12),
             ),
           ),
         ],
@@ -172,19 +237,35 @@ class _DocumentoDeIdentidadState extends State<DocumentoDeIdentidad> {
           ),
           SizedBox(height: 5),
           InkWell(
-            onTap: () {
-              _selectDate(context);
+            onTap: () async {
+              final DateTime? pickedDate = await showDatePicker(
+                context: context,
+                initialDate: DateTime.now(),
+                firstDate: DateTime(1900),
+                lastDate: DateTime.now(),
+              );
+              if (pickedDate != null && pickedDate != _selectedDate) {
+                setState(() {
+                  _selectedDate = pickedDate;
+                  _fechaExpedicion = '${pickedDate.day}/${pickedDate.month}/${pickedDate.year}';
+                  print('Fecha de expedición: $_fechaExpedicion');
+                });
+              }
             },
             child: Container(
               height: 50,
               padding: EdgeInsets.symmetric(horizontal: 12),
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.black54),
+                borderRadius: BorderRadius.circular(5),
+              ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
                     _selectedDate != null
                         ? '${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}'
-                        : 'Seleccionar fecha',
+                        : '',
                   ),
                   Icon(Icons.calendar_today),
                 ],
@@ -195,4 +276,27 @@ class _DocumentoDeIdentidadState extends State<DocumentoDeIdentidad> {
       ),
     );
   }
+  void _saveFormData() {
+  // Capturar el número de cédula ingresado
+  String numeroCedula = _numeroCedula ?? '';
+
+  // Capturar la fecha de expedición seleccionada
+  String fechaExpedicion = _fechaExpedicion ?? '';
+
+  // Capturar la imagen frontal en base64
+  String frontalImageBase64 = _frontalImageBase64 ?? '';
+
+  // Capturar la imagen trasera en base64
+  String traseraImageBase64 = _traseraImageBase64 ?? '';
+
+  // Ahora puedes hacer lo que necesites con los datos capturados, como enviarlos a una base de datos, guardarlos localmente, etc.
+  // Por ejemplo, podrías imprimirlos para verificar que se capturaron correctamente:
+  print('Número de cédula: $numeroCedula');
+  print('Fecha de expedición: $fechaExpedicion');
+  print('Imagen frontal en base64: $frontalImageBase64');
+  print('Imagen trasera en base64: $traseraImageBase64');
+
+  // Aquí puedes realizar la lógica para guardar los datos en tu base de datos o sistema de almacenamiento.
+}
+
 }

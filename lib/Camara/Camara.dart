@@ -13,7 +13,6 @@ class _CameraState extends State<Camera> {
   late int _currentCameraIndex;
   XFile? _capturedImage;
 
-
   @override
   void initState() {
     super.initState();
@@ -55,7 +54,7 @@ class _CameraState extends State<Camera> {
       _currentCameraIndex = (_currentCameraIndex + 1) % _cameras.length;
       _controller = CameraController(
         _cameras[_currentCameraIndex],
-        ResolutionPreset.medium,
+        ResolutionPreset.medium
       );
       _controller.initialize().then((_) {
         setState(() {});

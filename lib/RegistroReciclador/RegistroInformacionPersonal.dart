@@ -1,5 +1,8 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
-import '../Camara/Camara.dart'; // Asegúrate de importar el archivo de la nueva vista de la cámara
+import 'package:visual1/Camara/Camara.dart';
 
 class RegistroInformacionPersonal extends StatefulWidget {
   @override
@@ -14,13 +17,32 @@ class _RegistroInformacionPersonalState
   final TextEditingController _phoneController = TextEditingController();
   String _profileImagePath = 'assets/Perfil.png';
   DateTime? _selectedDate;
+  String? _capturedImagePath;
+  String _profileImageBase64 = '';
+  File? _imageFile;
+
+  void _takePicture() async {
+    final imagePath = await Navigator.push<String>(
+      context,
+      MaterialPageRoute(builder: (context) => Camera()),
+    );
+    if (imagePath != null) {
+      final bytes = await File(imagePath).readAsBytes();
+      final base64Image = base64Encode(bytes);
+      setState(() {
+        _profileImageBase64 = base64Image;
+        _imageFile = File(imagePath);
+      });
+    }
+    print("Imagen en Base64: $_profileImageBase64");
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.green[900],
         title: Text('Información Personal'),
+        backgroundColor: Colors.green[900],
       ),
       body: SingleChildScrollView(
         child: Center(
@@ -30,27 +52,43 @@ class _RegistroInformacionPersonalState
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 GestureDetector(
-                  onTap: () async {
-                    final imagePath = await Navigator.push<String>(
-                      context,
-                      MaterialPageRoute(builder: (context) => Camera()),
-                    );
-                    if (imagePath != null) {
-                      setState(() {
-                        _profileImagePath = imagePath;
-                      });
-                    }
-                  },
+                  onTap: _takePicture,
                   child: Container(
-                    width: 100,
-                    height: 100,
+                    width: 150,
+                    height: 150,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      border: Border.all(color: Color(0xFF1B5E20), width: 2),
+                      border: Border.all(color: Colors.green[900]!, width: 5),
                     ),
-                    child: CircleAvatar(
-                      backgroundColor: Colors.white,
-                      backgroundImage: AssetImage(_profileImagePath),
+                    child: Stack(
+                      children: [
+                        _imageFile != null
+                            ? CircleAvatar(
+                                radius: 75,
+                                backgroundImage: FileImage(_imageFile!),
+                              )
+                            : CircleAvatar(
+                                radius: 75,
+                                backgroundColor: Colors.white,
+                                backgroundImage:
+                                    AssetImage('assets/Perfil.png'),
+                              ),
+                        Positioned(
+                          bottom: 0,
+                          right: 0,
+                          child: Container(
+                            padding: EdgeInsets.all(6),
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.green[900],
+                            ),
+                            child: Icon(
+                              Icons.camera_alt,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
@@ -134,7 +172,7 @@ class _RegistroInformacionPersonalState
                 Text(
                   _selectedDate != null
                       ? '${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}'
-                      : 'Seleccione la fecha',
+                      : '',
                   style: TextStyle(color: Colors.black),
                 ),
                 Icon(Icons.calendar_today),
@@ -219,7 +257,7 @@ class _RegistroInformacionPersonalState
     // De manera similar, puedes acceder al valor utilizando un controlador o mediante el método onChanged
     // Por ejemplo, si estás utilizando onChanged, podrías tener una variable de estado para el teléfono y capturar el valor de esta manera:
     String telefono = _phoneController.text;
-  
+
     // Ahora puedes hacer lo que necesites con los datos capturados, como enviarlos a una base de datos, guardarlos localmente, etc.
   }
 }

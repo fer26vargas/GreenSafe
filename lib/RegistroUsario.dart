@@ -1,6 +1,54 @@
 import 'package:flutter/material.dart';
 
-class RegistroUsuario extends StatelessWidget {
+class RegistroUsuario extends StatefulWidget {
+  @override
+  _RegistroUsuarioState createState() => _RegistroUsuarioState();
+}
+
+class _RegistroUsuarioState extends State<RegistroUsuario> {
+  late TextEditingController _nombresController;
+  late TextEditingController _apellidosController;
+  late TextEditingController _emailController;
+  late TextEditingController _passwordController;
+  late TextEditingController _confirmPasswordController;
+  DateTime? _selectedDate;
+  late bool _isLabelVisible;
+
+  @override
+  void initState() {
+    super.initState();
+    _nombresController = TextEditingController();
+    _apellidosController = TextEditingController();
+    _emailController = TextEditingController();
+    _passwordController = TextEditingController();
+    _confirmPasswordController = TextEditingController();
+    _isLabelVisible = true;
+  }
+
+  @override
+  void dispose() {
+    _nombresController.dispose();
+    _apellidosController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    _confirmPasswordController.dispose();
+    super.dispose();
+  }
+
+  void _saveFormData() {
+    String nombres = _nombresController.text;
+    String apellidos = _apellidosController.text;
+    String email = _emailController.text;
+    String password = _passwordController.text;
+    String confirmPassword = _confirmPasswordController.text;
+    String fechaNacimiento = _selectedDate != null
+        ? '${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}'
+        : '';
+
+    // Aquí puedes hacer lo que necesites con los datos capturados,
+    // como enviarlos a una base de datos, guardarlos localmente, etc.
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -14,7 +62,8 @@ class RegistroUsuario extends StatelessWidget {
               children: <Widget>[
                 Image.asset(
                   'assets/registro.png',
-                  width: 280, height: 220,
+                  width: 280,
+                  height: 200,
                 ),
                 Text(
                   'Regístrate',
@@ -25,35 +74,70 @@ class RegistroUsuario extends StatelessWidget {
                     fontFamily: 'RobotoMono',
                   ),
                 ),
-                SizedBox(height: 30), 
-                RegistroTextField(label: 'Nombres'),
+                SizedBox(height: 30),
+                _buildTextField('Nombres', _nombresController),
                 SizedBox(height: 10),
-                RegistroTextField(label: 'Apellidos'),
+                _buildTextField('Apellidos', _apellidosController),
                 SizedBox(height: 10),
-                RegistroTextField(label: 'Correo Electrónico'),
+                _buildTextField('Correo Electrónico', _emailController),
                 SizedBox(height: 10),
-                RegistroTextField(label: 'Contraseña'),
+                _buildTextField('Contraseña', _passwordController, isPassword: true),
                 SizedBox(height: 10),
-                RegistroTextField(label: 'Confirmar Contraseña'),
-                SizedBox(height: 20), 
-                ElevatedButton(
-                  onPressed: () {
-                    // Lógica para crear cuenta
+                _buildTextField('Confirmar Contraseña', _confirmPasswordController, isPassword: true),
+                SizedBox(height: 10),
+                InkWell(
+                  onTap: () {
+                    _selectDate(context);
                   },
+                  child: Container(
+                    width: 308,
+                    height: 45,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(25),
+                      border: Border.all(color: Color(0xFF316C09), width: 5),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 15),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            _selectedDate != null
+                                ? '${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}'
+                                : 'Fecha de Nacimiento',
+                            style: TextStyle(
+                              color: _selectedDate != null
+                                  ? Color(0xFF585858)
+                                  : Color(0xFF585858),
+                              fontFamily: 'RobotoMono',
+                            ),
+                          ),
+                          Icon(Icons.calendar_today),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: _saveFormData,
                   style: ElevatedButton.styleFrom(
-                    primary: Color(0xFF316C09), 
-                    minimumSize: Size(250, 40), 
+                    primary: Color(0xFF316C09),
+                    minimumSize: Size(250, 40),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(25), 
-                      side: BorderSide(color: Color(0xFF316C09), width: 6), 
+                      borderRadius: BorderRadius.circular(25),
+                      side: BorderSide(
+                        color: Color(0xFF316C09),
+                        width: 6,
+                      ),
                     ),
                   ),
                   child: Text(
                     'Crear cuenta',
                     style: TextStyle(
-                      color: Colors.white, 
+                      color: Colors.white,
                       fontSize: 20.0,
-                      fontWeight: FontWeight.bold, 
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
                 ),
@@ -64,54 +148,29 @@ class RegistroUsuario extends StatelessWidget {
       ),
     );
   }
-}
 
-class RegistroTextField extends StatefulWidget {
-  final String label;
-
-  const RegistroTextField({Key? key, required this.label}) : super(key: key);
-
-  @override
-  _RegistroTextFieldState createState() => _RegistroTextFieldState();
-}
-
-class _RegistroTextFieldState extends State<RegistroTextField> {
-  late TextEditingController _controller;
-  bool _isLabelVisible = true;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = TextEditingController();
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildTextField(String label, TextEditingController controller, {bool isPassword = false}) {
     return Container(
       width: 308,
       height: 45,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(25), 
-        border: Border.all(color: Color(0xFF316C09), width: 5), 
+        borderRadius: BorderRadius.circular(25),
+        border: Border.all(color: Color(0xFF316C09), width: 5),
       ),
       child: TextField(
-        controller: _controller,
-        style: TextStyle(color: Color(0xFF585858)), 
-        textAlignVertical: TextAlignVertical.top, 
+        controller: controller,
+        obscureText: isPassword,
+        style: TextStyle(color: Color(0xFF585858), fontFamily: 'RobotoMono'),
+        textAlignVertical: TextAlignVertical.top,
         textAlign: TextAlign.left,
         decoration: InputDecoration(
           contentPadding: EdgeInsets.symmetric(horizontal: 15),
-          hintText: _isLabelVisible ? widget.label : '',
+          hintText: label,
           hintStyle: TextStyle(
             color: Color(0xFF585858),
+            fontFamily: 'RobotoMono',
           ),
-          border: InputBorder.none, 
+          border: InputBorder.none,
         ),
         onChanged: (value) {
           setState(() {
@@ -120,5 +179,19 @@ class _RegistroTextFieldState extends State<RegistroTextField> {
         },
       ),
     );
+  }
+
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime? pickedDate = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(1900),
+      lastDate: DateTime.now(),
+    );
+    if (pickedDate != null) {
+      setState(() {
+        _selectedDate = pickedDate;
+      });
+    }
   }
 }
