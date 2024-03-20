@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-
+import 'package:visual1/RegistroReciclador/RegistroBascula.dart';
+import 'package:visual1/RegistroReciclador/RegistroTransporteRecolector.dart';
 import 'DocumentoIdentidad.dart';
 import 'RegistroInformacionPersonal.dart';
 
@@ -57,6 +58,16 @@ class _RegistroRecicladorState extends State<RegistroReciclador> {
             Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => DocumentoDeIdentidad()), 
+            );
+          } else if (text == 'Transporte Recolector') {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => RegistroTransporteRecolector()), 
+            );
+          } else if (text == 'Báscula') {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => RegistroBascula()), 
             );
           } else {
             setState(() {
