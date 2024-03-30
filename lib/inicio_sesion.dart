@@ -17,7 +17,11 @@ class _InicioSesionState extends State<InicioSesion> {
 
     const apiUrl = 'https://72cf-190-121-149-118.ngrok-free.app/SingIn';
     final Uri uri = Uri.parse('$apiUrl?email=${Uri.encodeComponent(email)}&pass=${Uri.encodeComponent(password)}');
-
+    //Si las credenciales del usuario son correctas 
+    //Navigator.push(
+    // context,
+    // MaterialPageRoute(builder: (context) => VistaPrincipal()), 
+    //);
     try {
       final response = await http.post(
         uri,

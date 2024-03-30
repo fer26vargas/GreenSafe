@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:visual1/RegistroReciclador/RegistroInformacionPersonal.dart';
+import 'package:visual1/SeccionUsuarios/EditarPerfil.dart';
+import 'package:visual1/SeccionUsuarios/vistaPrincipal.dart';
 import 'inicio_principal.dart'; 
 
 void main() {
@@ -14,7 +17,7 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.green,
         primaryColor: Colors.green[900], 
       ),
-      home: InicioPrincipal(),
+      home: VistaPrincipal(),
     );
   }
 }
