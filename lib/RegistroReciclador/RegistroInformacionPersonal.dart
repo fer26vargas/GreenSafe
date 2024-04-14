@@ -4,6 +4,9 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:visual1/Camara/Camara.dart';
 
+import '../Models/RecyclerModel.dart';
+import 'RegistroReciclador.dart';
+
 class RegistroInformacionPersonal extends StatefulWidget {
   @override
   _RegistroInformacionPersonalState createState() =>
@@ -13,12 +16,10 @@ class RegistroInformacionPersonal extends StatefulWidget {
 class _RegistroInformacionPersonalState
     extends State<RegistroInformacionPersonal> {
   final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _addressController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
-  String _profileImagePath = 'assets/Perfil.png';
   DateTime? _selectedDate;
-  String? _capturedImagePath;
-  String _profileImageBase64 = '';
+  String _profileImageBase64 = 'assets/Perfil.png';
   File? _imageFile;
 
   void _takePicture() async {
@@ -100,9 +101,9 @@ class _RegistroInformacionPersonalState
                 ),
                 SizedBox(height: 20),
                 _buildFormField(
-                  labelText: 'Correo Electrónico',
-                  icon: Icons.email,
-                  controller: _emailController,
+                  labelText: 'Direccion',
+                  icon: Icons.house,
+                  controller: _addressController,
                 ),
                 SizedBox(height: 20),
                 _buildFormField(
@@ -124,7 +125,13 @@ class _RegistroInformacionPersonalState
           width: double.infinity,
           child: ElevatedButton(
             onPressed: () {
-              _saveFormData(); // Captura los datos del formulario cuando se presiona el botón de guardar
+              _saveFormData();
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => RegistroReciclador(),
+                ),
+              );
             },
             style: ElevatedButton.styleFrom(
               primary: Colors.green[900],
@@ -193,8 +200,7 @@ class _RegistroInformacionPersonalState
     );
     if (pickedDate != null) {
       setState(() {
-        _selectedDate =
-            pickedDate; // Captura la fecha de nacimiento seleccionada por el usuario
+        _selectedDate = pickedDate;
       });
     }
   }
@@ -231,33 +237,39 @@ class _RegistroInformacionPersonalState
             border: OutlineInputBorder(),
             contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 12),
           ),
-          controller: controller, // Asigna el controlador al campo de texto
-          onChanged: (value) {
-            // Captura el valor del campo de texto cuando cambia
-            // Puedes almacenar estos valores en variables o en algún objeto según sea necesario
-            // Por ejemplo, puedes usar un Map<String, dynamic> o un modelo de datos personalizado
-          },
+          controller: controller,
+          onChanged: (value) {},
         ),
       ],
     );
   }
 
-  void _saveFormData() {
-    // Capturar el valor del campo de nombres y apellidos
-    // Puedes acceder al valor utilizando un controlador o mediante el método onChanged
-    // Por ejemplo, si estás utilizando onChanged, podrías tener una variable de estado para cada campo y capturar el valor de esta manera:
-    String nombres = _nameController.text;
+  Future<int> _saveFormData() async {
+    final recyclerModel = RecyclerModel.instance;
+    print("entrando a guardar");
+    try {
+      String nombres = _nameController.text;
 
-    // Capturar el valor del campo de correo electrónico
-    // Aquí también puedes acceder al valor utilizando un controlador o mediante el método onChanged
-    // Por ejemplo, si estás utilizando onChanged, podrías tener una variable de estado para el correo electrónico y capturar el valor de esta manera:
-    String correoElectronico = _emailController.text;
+      recyclerModel.recycler.Name = nombres;
+      recyclerModel.recycler.Address = _addressController.text;
+      recyclerModel.recycler.Phone = _phoneController.text;
+      recyclerModel.recycler.FechaNacimiento = _selectedDate;
+      recyclerModel.recycler.Photo = _profileImageBase64;
 
-    // Capturar el valor del campo de teléfono
-    // De manera similar, puedes acceder al valor utilizando un controlador o mediante el método onChanged
-    // Por ejemplo, si estás utilizando onChanged, podrías tener una variable de estado para el teléfono y capturar el valor de esta manera:
-    String telefono = _phoneController.text;
+      print(
+          'El nombre recyclador desde save es: ${recyclerModel.recycler.Name}');
+      print('fecha nacimiento: ${recyclerModel.recycler.FechaNacimiento}');
 
-    // Ahora puedes hacer lo que necesites con los datos capturados, como enviarlos a una base de datos, guardarlos localmente, etc.
+      String direccion = _addressController.text;
+      String telefono = _phoneController.text;
+      String fotoDePerfil = _profileImageBase64;
+      print('imagen: $direccion');
+      print('imagen: $telefono');
+      print('imagen: $fotoDePerfil');
+      return 1;
+    } catch (e) {
+      print(e);
+      return 0;
+    }
   }
 }

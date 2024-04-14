@@ -15,9 +15,8 @@ class _VistaPrincipalState extends State<VistaPrincipal> {
   void actualizarDatos() {
     // Aquí iría la lógica para obtener los datos de la base de datos
     // Supongamos que se obtienen los valores de papel/cartón y plástico/metal/vidrio desde la base de datos
-    double papelCartonDesdeBD = 17804; // Obtener desde la base de datos
-    double plasticoMetalVidrioDesdeBD =
-        1234567; // Obtener desde la base de datos
+    double papelCartonDesdeBD = 174000; // Obtener desde la base de datos (estos son kg)
+    double plasticoMetalVidrioDesdeBD = 12; // Obtener desde la base de datos
 
     // Actualizar los valores con los obtenidos de la base de datos
     setState(() {
@@ -28,15 +27,18 @@ class _VistaPrincipalState extends State<VistaPrincipal> {
 
   // Función para ajustar automáticamente la unidad según el valor de la cantidad
   String ajustarUnidad(double cantidad) {
-    if (cantidad >= 1000000) {
-      // Si la cantidad es mayor o igual a 1,000,000, cambia a toneladas
-      return '${(cantidad / 1000000).toStringAsFixed(2).replaceAll(RegExp(r'([.]*0)(?!.*\d)'), '')} Tn';
+    if (cantidad >= 1000000000) {
+      // Cambia a millones de toneladas si la cantidad es mayor o igual a 1 billón
+      return '${(cantidad / 1000000000).toStringAsFixed(2).replaceAll(RegExp(r'([.]*0)(?!.*\d)'), '')}M Tn';
+    } else if (cantidad >= 1000000) {
+      // Cambia a miles de toneladas si la cantidad es mayor o igual a 1 millón pero menor a 1 billón
+      return '${(cantidad / 1000000).toStringAsFixed(2).replaceAll(RegExp(r'([.]*0)(?!.*\d)'), '')}K Tn';
     } else if (cantidad >= 1000) {
-      // Si la cantidad es mayor o igual a 1,000, cambia a kilogramos
-      return '${(cantidad / 1000).toStringAsFixed(2).replaceAll(RegExp(r'([.]*0)(?!.*\d)'), '')} Kg';
+      // Cambia a toneladas si la cantidad es mayor o igual a 1 mil pero menor a 1 millón
+      return '${(cantidad / 1000).toStringAsFixed(2).replaceAll(RegExp(r'([.]*0)(?!.*\d)'), '')} Tn';
     } else {
-      // Si la cantidad es menor que 1,000, mantén en gramos
-      return '${cantidad.toStringAsFixed(2).replaceAll(RegExp(r'([.]*0)(?!.*\d)'), '')} g';
+      // Mantén en kilogramos si la cantidad es menor a 1 mil
+      return '${cantidad.toStringAsFixed(2).replaceAll(RegExp(r'([.]*0)(?!.*\d)'), '')} Kg';
     }
   }
 

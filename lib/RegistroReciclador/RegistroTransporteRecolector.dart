@@ -3,15 +3,20 @@ import 'package:flutter/material.dart';
 import '../Camara/Camara.dart';
 import 'dart:convert';
 
+import '../Models/RecyclerModel.dart';
+import 'RegistroReciclador.dart';
+
 class RegistroTransporteRecolector extends StatefulWidget {
   @override
-  _RegistroTransporteRecolectorState createState() => _RegistroTransporteRecolectorState();
+  _RegistroTransporteRecolectorState createState() =>
+      _RegistroTransporteRecolectorState();
 }
 
-class _RegistroTransporteRecolectorState extends State<RegistroTransporteRecolector> {
+class _RegistroTransporteRecolectorState
+    extends State<RegistroTransporteRecolector> {
   String? _vehiculoImageBase64;
   String? _numeroPlaca;
-
+  String? _descripcionVehiculo;
 
   Future<void> _convertAndSetFrontalImage(File imageFile) async {
     List<int> imageBytes = await imageFile.readAsBytes();
@@ -28,7 +33,7 @@ class _RegistroTransporteRecolectorState extends State<RegistroTransporteRecolec
       appBar: AppBar(
         backgroundColor: Colors.green[900],
         title: Text(
-          'Cédula de Ciudadanía',
+          'Registro de Vehículo',
           style: TextStyle(
             color: Colors.white,
           ),
@@ -41,8 +46,10 @@ class _RegistroTransporteRecolectorState extends State<RegistroTransporteRecolec
             SizedBox(height: 15),
             _buildFormField('Número de placa'),
             SizedBox(height: 15),
+            _buildFormField('Descripción del vehículo'),
+            SizedBox(height: 15),
             Text(
-              'Foto del Vehiculo Recolector',
+              'Foto del Vehículo Recolector',
               style: TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.bold,
@@ -84,27 +91,7 @@ class _RegistroTransporteRecolectorState extends State<RegistroTransporteRecolec
           ],
         ),
       ),
-      bottomNavigationBar: Container(
-        margin: EdgeInsets.all(20),
-        child: SizedBox(
-          width: double.infinity,
-          child: ElevatedButton(
-            onPressed: () {
-              _saveFormData(); // Acción para guardar los datos
-            },
-            style: ElevatedButton.styleFrom(
-              primary: Colors.green[900],
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(30),
-              ),
-            ),
-            child: Padding(
-              padding: EdgeInsets.symmetric(vertical: 15, horizontal: 20),
-              child: Text('Guardar'),
-            ),
-          ),
-        ),
-      ),
+      bottomNavigationBar: _buildSaveButton(),
     );
   }
 
@@ -126,8 +113,13 @@ class _RegistroTransporteRecolectorState extends State<RegistroTransporteRecolec
           TextFormField(
             onChanged: (value) {
               setState(() {
-                _numeroPlaca = value;
-                print('Número de placa: $_numeroPlaca');
+                if (labelText == 'Número de placa') {
+                  _numeroPlaca = value;
+                  print('Número de placa: $_numeroPlaca');
+                } else if (labelText == 'Descripción del vehículo') {
+                  _descripcionVehiculo = value;
+                  print('Descripción del vehículo: $_descripcionVehiculo');
+                }
               });
             },
             decoration: InputDecoration(
@@ -141,18 +133,49 @@ class _RegistroTransporteRecolectorState extends State<RegistroTransporteRecolec
     );
   }
 
-  void _saveFormData() {
-    // Capturar el número de placa
-    String numeroPlaca = _numeroPlaca ?? '';
+  Widget _buildSaveButton() {
+    return Container(
+      margin: EdgeInsets.all(20),
+      child: SizedBox(
+        width: double.infinity,
+        child: ElevatedButton(
+          onPressed: () async {
+            var result = await _saveFormTransport();
+            if (result == 1) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => RegistroReciclador()),
+              );
+            }
+          },
+          child: Padding(
+            padding: EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+            child: Text('Guardar'),
+          ),
+        ),
+      ),
+    );
+  }
 
-    // Capturar la imagen del vehículo en base64
-    String vehiculoImageBase64 = _vehiculoImageBase64 ?? '';
+  Future<int> _saveFormTransport() async {
+    final recyclerModel = RecyclerModel.instance;
+    print("entrando a guardar");
+    try {
+      recyclerModel.recycler.Placa = _numeroPlaca ?? '';
+      recyclerModel.recycler.DescripcionVehiculo = _descripcionVehiculo ?? '';
+      String fotoVehiculo = _vehiculoImageBase64 ?? '';
+      String placa = _numeroPlaca ?? '';
+      String descripcionVehiculo = _descripcionVehiculo ?? '';
 
-    // Ahora puedes hacer lo que necesites con los datos capturados, como enviarlos a una base de datos, guardarlos localmente, etc.
-    // Por ejemplo, podrías imprimirlos para verificar que se capturaron correctamente:
-    print('Número de placa: $numeroPlaca');
-    print('Imagen del vehículo en base64: $vehiculoImageBase64');
-
-    // Aquí puedes realizar la lógica para guardar los datos en tu base de datos o sistema de almacenamiento.
+      print('placa: $placa');
+      print('Descripcion vehiculo: $descripcionVehiculo');
+      print('Imagen frontal en base64: $fotoVehiculo');
+      
+      print('Imagen frontal en base64: $fotoVehiculo');
+      return 1;
+    } catch (e) {
+      print(e);
+      return 0;
+    }
   }
 }

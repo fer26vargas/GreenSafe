@@ -1,8 +1,13 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:visual1/RegistroReciclador/RegistroBascula.dart';
-import 'package:visual1/RegistroReciclador/RegistroTransporteRecolector.dart';
+import '../Models/RecyclerModel.dart';
+import '../SeccionReciclador/inicioReciclador.dart';
 import 'DocumentoIdentidad.dart';
+import 'RegistroBascula.dart';
+import 'RegistroCredenciales.dart';
+import 'RegistroTransporteRecolector.dart';
 import 'RegistroInformacionPersonal.dart';
+import 'package:http/http.dart' as http;
 
 class RegistroReciclador extends StatefulWidget {
   @override
@@ -10,8 +15,6 @@ class RegistroReciclador extends StatefulWidget {
 }
 
 class _RegistroRecicladorState extends State<RegistroReciclador> {
-  bool camposCompletos = false;
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -27,12 +30,14 @@ class _RegistroRecicladorState extends State<RegistroReciclador> {
       ),
       body: Column(
         children: [
-          SizedBox(height: 10), // Separación desde la parte superior
-          buildButton('Información Personal', context), // Aquí paso el contexto
-          buildButton('Documento de Identidad',context), //
-          buildButton('Transporte Recolector',context), //
-          buildButton('Báscula',context), //
-          Expanded(child: SizedBox()), // Espacio expandible para el botón inferior
+          SizedBox(height: 10),
+          buildButton('Información Personal', context),
+          buildButton('Documento de Identidad', context),
+          buildButton('Transporte Recolector', context),
+          buildButton('Báscula', context),
+          buildButton('Registro de credenciales', context),
+          Expanded(
+              child: SizedBox()), // Espacio expandible para el botón inferior
           buildSendButton(),
         ],
       ),
@@ -48,31 +53,41 @@ class _RegistroRecicladorState extends State<RegistroReciclador> {
       ),
       child: TextButton(
         onPressed: () {
-          // Lógica del botón
           if (text == 'Información Personal') {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => RegistroInformacionPersonal()), 
+              MaterialPageRoute(
+                builder: (context) => RegistroInformacionPersonal(),
+              ),
             );
           } else if (text == 'Documento de Identidad') {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => DocumentoDeIdentidad()), 
+              MaterialPageRoute(
+                builder: (context) => DocumentoDeIdentidad(),
+              ),
             );
           } else if (text == 'Transporte Recolector') {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => RegistroTransporteRecolector()), 
+              MaterialPageRoute(
+                builder: (context) => RegistroTransporteRecolector(),
+              ),
             );
           } else if (text == 'Báscula') {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => RegistroBascula()), 
+              MaterialPageRoute(
+                builder: (context) => RegistroBascula(),
+              ),
             );
-          } else {
-            setState(() {
-              camposCompletos = !camposCompletos;
-            });
+          } else if (text == 'Registro de credenciales') {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => RegistroCredenciales(),
+              ),
+            );
           }
         },
         child: Row(
@@ -84,7 +99,7 @@ class _RegistroRecicladorState extends State<RegistroReciclador> {
                 text,
                 style: TextStyle(
                   fontSize: 16,
-                  color: Colors.black54, 
+                  color: Colors.black54,
                 ),
               ),
             ),
@@ -98,16 +113,17 @@ class _RegistroRecicladorState extends State<RegistroReciclador> {
     );
   }
 
-
   Widget buildSendButton() {
     return Container(
       margin: EdgeInsets.all(10),
-      width: double.infinity, 
+      width: double.infinity,
       child: ElevatedButton(
-        onPressed: camposCompletos ? () {} : null,
+        onPressed: () {
+          RegisterRecycler();
+        },
         style: ElevatedButton.styleFrom(
           padding: EdgeInsets.all(15),
-          primary: camposCompletos ? Colors.green[900] : Colors.grey,
+          primary: Colors.green[900],
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10),
           ),
@@ -122,5 +138,35 @@ class _RegistroRecicladorState extends State<RegistroReciclador> {
       ),
     );
   }
-}
 
+  Future<bool> RegisterRecycler() async {
+    final recyclerModel = RecyclerModel.instance;
+
+    print('Datos enviados: ${recyclerModel.recycler.toJson()}');
+
+    const apiUrl =
+        'https://d2d1-191-104-228-171.ngrok-free.app/RegisterRecycler';
+    final uri = Uri.parse(apiUrl);
+
+    try {
+      final response = await http.post(
+        uri,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(recyclerModel.recycler.toJson()),
+      );
+
+      if (response.statusCode == 200) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => InicioPrincipalReciclador()),
+        );
+        return true;
+      } else {
+        return false;
+      }
+    } catch (e) {
+      print('error: $e');
+      return false;
+    }
+  }
+}

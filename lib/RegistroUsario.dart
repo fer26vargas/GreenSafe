@@ -45,8 +45,6 @@ class _RegistroUsuarioState extends State<RegistroUsuario> {
         ? '${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}'
         : '';
 
-    // Aquí puedes hacer lo que necesites con los datos capturados,
-    // como enviarlos a una base de datos, guardarlos localmente, etc.
   }
 
   @override

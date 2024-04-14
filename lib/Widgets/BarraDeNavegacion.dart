@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:visual1/SeccionUsuarios/vistaPrincipal.dart';
 /*import '../SeccionUsuarios/EstadisticasUsuario.dart';
-import '../SeccionUsuarios/PerfilDeUsuario.dart';
 import '../SeccionUsuarios/RecoleccionUsuario.dart';*/
+import '../SeccionUsuarios/EstadisticasUsuario.dart';
+import '../SeccionUsuarios/RecoleccionUsuario.dart';
 
 class BarraDeNavegacion extends StatelessWidget {
   @override
@@ -13,19 +15,19 @@ class BarraDeNavegacion extends StatelessWidget {
         children: [
           IconButton(
             onPressed: () {
-              //Navigator.push(context, MaterialPageRoute(builder: (context) => EstadisticasUsuario()));
+              Navigator.push(context, MaterialPageRoute(builder: (context) => EstadisticasUsuario()));
             },
             icon: Icon(Icons.insights),
           ),
           IconButton(
             onPressed: () {
-              //Navigator.push(context, MaterialPageRoute(builder: (context) => PerfilDeUsuario()));
+              Navigator.push(context, MaterialPageRoute(builder: (context) => VistaPrincipal()));
             },
-            icon: Icon(Icons.perm_identity),
+            icon: Icon(Icons.home),
           ),
           IconButton(
             onPressed: () {
-              //Navigator.push(context, MaterialPageRoute(builder: (context) => RecoleccionUsuario()));
+              Navigator.push(context, MaterialPageRoute(builder: (context) => RecoleccionUsuario()));
             },
             icon: Icon(Icons.airport_shuttle),
           ),

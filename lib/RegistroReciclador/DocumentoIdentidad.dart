@@ -1,8 +1,11 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:image/image.dart' as img; 
+import 'package:image/image.dart' as img;
 import '../Camara/Camara.dart';
 import 'dart:convert';
+
+import '../Models/RecyclerModel.dart';
+import 'RegistroReciclador.dart';
 
 class DocumentoDeIdentidad extends StatefulWidget {
   @override
@@ -14,41 +17,7 @@ class _DocumentoDeIdentidadState extends State<DocumentoDeIdentidad> {
   String? _frontalImageBase64;
   String? _traseraImageBase64;
   String? _numeroCedula;
-  String? _fechaExpedicion;
-
-  Future<void> _selectDate(BuildContext context) async {
-    final DateTime? pickedDate = await showDatePicker(
-      context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime(1900),
-      lastDate: DateTime.now(),
-    );
-    if (pickedDate != null && pickedDate != _selectedDate) {
-      setState(() {
-        _selectedDate = pickedDate;
-      });
-    }
-  }
-
-  File _rotateImage(File imageFile) {
-    final image = img.decodeImage(imageFile.readAsBytesSync())!;
-    final rotatedImage = img.copyRotate(image, 90);
-    return File(imageFile.path)..writeAsBytesSync(img.encodeJpg(rotatedImage));
-  }
-
-  Future<void> _convertAndSetFrontalImage(File imageFile, {required bool isFrontal}) async {
-  List<int> imageBytes = await imageFile.readAsBytes();
-  String base64Image = base64Encode(imageBytes);
-  setState(() {
-    if (isFrontal) {
-      _frontalImageBase64 = base64Image;
-    } else {
-      _traseraImageBase64 = base64Image;
-    }
-  });
-  print(isFrontal ? 'Imagen frontal en base64: $_frontalImageBase64' : 'Imagen trasera en base64: $_traseraImageBase64');
-}
-
+  DateTime? _fechaExpedicion;
 
   @override
   Widget build(BuildContext context) {
@@ -103,7 +72,7 @@ class _DocumentoDeIdentidadState extends State<DocumentoDeIdentidad> {
                 if (imagePath != null) {
                   File rotatedImage = _rotateImage(File(imagePath));
                   await _convertAndSetFrontalImage(rotatedImage,
-                      isFrontal: true); // Para la imagen frontal
+                      isFrontal: true);
                 }
               },
               style: ElevatedButton.styleFrom(
@@ -148,7 +117,7 @@ class _DocumentoDeIdentidadState extends State<DocumentoDeIdentidad> {
                 if (imagePath != null) {
                   File rotatedImage = _rotateImage(File(imagePath));
                   await _convertAndSetFrontalImage(rotatedImage,
-                      isFrontal: false); // Para la imagen trasera
+                      isFrontal: false);
                 }
               },
               style: ElevatedButton.styleFrom(
@@ -164,27 +133,7 @@ class _DocumentoDeIdentidadState extends State<DocumentoDeIdentidad> {
           ],
         ),
       ),
-      bottomNavigationBar: Container(
-        margin: EdgeInsets.all(20),
-        child: SizedBox(
-          width: double.infinity,
-          child: ElevatedButton(
-            onPressed: () {
-              _saveFormData();// Acción para guardar los datos
-            },
-            style: ElevatedButton.styleFrom(
-              primary: Colors.green[900],
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(30),
-              ),
-            ),
-            child: Padding(
-              padding: EdgeInsets.symmetric(vertical: 15, horizontal: 20),
-              child: Text('Guardar'),
-            ),
-          ),
-        ),
-      ),
+      bottomNavigationBar: _buildSaveButton(),
     );
   }
 
@@ -247,7 +196,7 @@ class _DocumentoDeIdentidadState extends State<DocumentoDeIdentidad> {
               if (pickedDate != null && pickedDate != _selectedDate) {
                 setState(() {
                   _selectedDate = pickedDate;
-                  _fechaExpedicion = '${pickedDate.day}/${pickedDate.month}/${pickedDate.year}';
+                  _fechaExpedicion = pickedDate;
                   print('Fecha de expedición: $_fechaExpedicion');
                 });
               }
@@ -276,27 +225,79 @@ class _DocumentoDeIdentidadState extends State<DocumentoDeIdentidad> {
       ),
     );
   }
-  void _saveFormData() {
-  // Capturar el número de cédula ingresado
-  String numeroCedula = _numeroCedula ?? '';
 
-  // Capturar la fecha de expedición seleccionada
-  String fechaExpedicion = _fechaExpedicion ?? '';
+  Widget _buildSaveButton() {
+    return Container(
+      margin: EdgeInsets.all(20),
+      child: SizedBox(
+        width: double.infinity,
+        child: ElevatedButton(
+          onPressed: () async {
+            var result = await _saveFormDocument();
+            if (result == 1) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => RegistroReciclador()),
+              );
+              //Navegar
+            }
+          },
+          child: Padding(
+            padding: EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+            child: Text('Guardar'),
+          ),
+        ),
+      ),
+    );
+  }
 
-  // Capturar la imagen frontal en base64
-  String frontalImageBase64 = _frontalImageBase64 ?? '';
+  Future<int> _saveFormDocument() async {
+    final recyclerModel = RecyclerModel.instance;
+    print("entrando a guardar");
+    try {
+      recyclerModel.recycler.Document = _numeroCedula ?? '';
+      recyclerModel.recycler.FotoDocumentoFrontal = _frontalImageBase64 ?? '';
+      recyclerModel.recycler.FotoDocumentoTrasera = _traseraImageBase64 ?? '';
+      recyclerModel.recycler.FechaExpedicion = _selectedDate;
+      print('Fecha Expedicion selected: $_selectedDate');
+      String frontalImageBase64 = _frontalImageBase64 ?? '';
 
-  // Capturar la imagen trasera en base64
-  String traseraImageBase64 = _traseraImageBase64 ?? '';
+      String traseraImageBase64 = _traseraImageBase64 ?? '';
 
-  // Ahora puedes hacer lo que necesites con los datos capturados, como enviarlos a una base de datos, guardarlos localmente, etc.
-  // Por ejemplo, podrías imprimirlos para verificar que se capturaron correctamente:
-  print('Número de cédula: $numeroCedula');
-  print('Fecha de expedición: $fechaExpedicion');
-  print('Imagen frontal en base64: $frontalImageBase64');
-  print('Imagen trasera en base64: $traseraImageBase64');
+      print('Número de cédula: $_numeroCedula');
+      print('Fecha de expedición recycler: ${recyclerModel.recycler.FechaExpedicion}');
+      print('Imagen frontal en base64: $frontalImageBase64');
+      print('Imagen trasera en base64: $traseraImageBase64');
+      return 1;
+    } catch (e) {
+      print(e);
+      return 0;
+    }
+  }
 
-  // Aquí puedes realizar la lógica para guardar los datos en tu base de datos o sistema de almacenamiento.
-}
+  File _rotateImage(File imageFile) {
+    final image = img.decodeImage(imageFile.readAsBytesSync())!;
+    final rotatedImage = img.copyRotate(image, 90);
+    return File(imageFile.path)..writeAsBytesSync(img.encodeJpg(rotatedImage));
+  }
 
+  Future<void> _convertAndSetFrontalImage(File imageFile,
+      {required bool isFrontal}) async {
+    try {
+      List<int> imageBytes = await imageFile.readAsBytes();
+      String base64Image = base64Encode(imageBytes);
+      setState(() {
+        if (isFrontal) {
+          _frontalImageBase64 = base64Image;
+        } else {
+          _traseraImageBase64 = base64Image;
+        }
+      });
+      print(isFrontal
+          ? 'Imagen frontal en base64: $_frontalImageBase64'
+          : 'Imagen trasera en base64: $_traseraImageBase64');
+    } catch (e) {
+      print('Error al convertir la imagen a base64: $e');
+    }
+  }
 }

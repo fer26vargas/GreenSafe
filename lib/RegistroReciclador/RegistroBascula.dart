@@ -2,9 +2,11 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import '../Camara/Camara.dart';
 import 'dart:convert';
+import '../Models/RecyclerModel.dart';
+import 'RegistroReciclador.dart';
 
 class RegistroBascula extends StatefulWidget {
-  @override
+   @override
   _RegistroBasculaState createState() => _RegistroBasculaState();
 }
 
@@ -26,7 +28,7 @@ class _RegistroBasculaState extends State<RegistroBascula> {
       appBar: AppBar(
         backgroundColor: Colors.green[900],
         title: Text(
-          'Cédula de Ciudadanía',
+          'Bascula',
           style: TextStyle(
             color: Colors.white,
           ),
@@ -100,7 +102,13 @@ class _RegistroBasculaState extends State<RegistroBascula> {
           width: double.infinity,
           child: ElevatedButton(
             onPressed: () {
-              _saveFormData(); // Acción para guardar los datos
+              _saveFormBascula();
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => RegistroReciclador(),
+                ),
+              );
             },
             style: ElevatedButton.styleFrom(
               primary: Colors.green[900],
@@ -117,9 +125,18 @@ class _RegistroBasculaState extends State<RegistroBascula> {
       ),
     );
   }
-
-  void _saveFormData() {
-    String basculaImageBase64 = _basculaImageBase64 ?? '';
-    print('Imagen de la báscula en base64: $basculaImageBase64');
+  
+  Future<int> _saveFormBascula() async {
+    final recyclerModel = RecyclerModel.instance;
+    print("entrando a guardar");
+    try {
+      recyclerModel.recycler.Bascula = _basculaImageBase64 ?? '';
+      String basculaImageBase64 = _basculaImageBase64 ?? '';
+      print('imagen: $basculaImageBase64');
+      return 1;
+    } catch (e) {
+      print(e);
+      return 0;
+    }
   }
 }

@@ -3,9 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:visual1/Camara/Camara.dart';
-import '../Widgets/BarraDeNavegacion.dart'; // Importa el widget de la barra de navegación
-// Importa la clase DatabaseService
-//import 'database_service.dart';
+import '../Widgets/BarraDeNavegacion.dart'; 
 
 class EditarPerfil extends StatefulWidget {
   @override
@@ -17,15 +15,10 @@ class _EditarPerfilState extends State<EditarPerfil> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _addressController = TextEditingController();
-  String _profileImagePath = 'assets/Perfil.png';
   DateTime? _selectedDate;
-  String? _capturedImagePath;
   String _profileImageBase64 = '';
   File? _imageFile;
   bool _isEditing = false;
-
-  // Instancia de DatabaseService
-  //final DatabaseService _databaseService = DatabaseService();
 
   void _takePicture() async {
     final imagePath = await Navigator.push<String>(
@@ -46,20 +39,16 @@ class _EditarPerfilState extends State<EditarPerfil> {
   @override
   void initState() {
     super.initState();
-    // Simulación de obtención de datos del perfil desde la base de datos
     _fetchProfileData();
   }
 
-  // Método para simular la obtención de datos del perfil desde la base de datos
   void _fetchProfileData() {
-    // Aquí puedes simular la obtención de datos del perfil
-    // Por ejemplo, asignaremos datos estáticos para la demostración
     setState(() {
       _nameController.text = 'John Doe';
       _emailController.text = 'john.doe@example.com';
       _phoneController.text = '+1234567890';
       _addressController.text = '123 Main Street, City';
-      _selectedDate = DateTime(1990, 1, 1); // Fecha de nacimiento simulada
+      _selectedDate = DateTime(1990, 1, 1); 
     });
   }
 
@@ -171,12 +160,10 @@ class _EditarPerfilState extends State<EditarPerfil> {
           ),
         ),
         SizedBox(height: 5),
-        // Deshabilita la interacción del InkWell para bloquear la edición de la fecha
         AbsorbPointer(
           absorbing: true,
           child: InkWell(
             onTap: () {
-              // No hacer nada cuando se hace clic en el campo de fecha
             },
             child: Container(
               height: 50,
@@ -264,28 +251,15 @@ class _EditarPerfilState extends State<EditarPerfil> {
   }
 
   void _saveFormData() {
-    // Captura los valores de los campos de texto
     String nombres = _nameController.text;
     String correoElectronico = _emailController.text;
     String telefono = _phoneController.text;
     String direccion = _addressController.text;
-
-    // Guarda los datos en la base de datos
-    /*_databaseService.saveProfileData(
-      nombres: nombres,
-      correoElectronico: correoElectronico,
-      telefono: telefono,
-      direccion: direccion,
-    );
-    */
-
-    // Imprime los campos con los nuevos datos
     print('Nombres y Apellidos: $nombres');
     print('Correo Electrónico: $correoElectronico');
     print('Teléfono: $telefono');
     print('Dirección: $direccion');
 
-    // Obtén los datos actualizados de la base de datos y actualiza la UI
     _fetchProfileData();
   }
 
