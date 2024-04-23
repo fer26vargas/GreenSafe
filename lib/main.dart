@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'SeccionReciclador/VistaReciclador.dart';
+import 'SeccionUsuarios/RecoleccionUsuario.dart';
 import 'inicio_principal.dart'; 
 
 void main() {
@@ -14,7 +16,7 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.green,
         primaryColor: Colors.green[900], 
       ),
-      home: InicioPrincipal(),
+      home: RecoleccionUsuario(),
     );
   }
 }

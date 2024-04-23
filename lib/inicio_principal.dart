@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'RegistroReciclador/RegistroReciclador.dart';
-import 'RegistroUsario.dart';
+import 'RegistroUser/RegistroUsario.dart';
 import 'inicio_sesion.dart';
 
 class CustomButton extends StatelessWidget {

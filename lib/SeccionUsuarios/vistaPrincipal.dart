@@ -57,7 +57,7 @@ class _VistaPrincipalState extends State<VistaPrincipal> {
         children: [
           Container(
             width: double.infinity,
-            height: MediaQuery.of(context).size.height * 0.6,
+            height: MediaQuery.of(context).size.height * 0.5,
             child: Stack(
               children: [
                 Positioned.fill(

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../Models/UsersModel.dart';
+import 'RegistroCredencialesUser.dart'; 
 
 class RegistroUsuario extends StatefulWidget {
   @override
@@ -6,46 +8,11 @@ class RegistroUsuario extends StatefulWidget {
 }
 
 class _RegistroUsuarioState extends State<RegistroUsuario> {
-  late TextEditingController _nombresController;
-  late TextEditingController _apellidosController;
-  late TextEditingController _emailController;
-  late TextEditingController _passwordController;
-  late TextEditingController _confirmPasswordController;
   DateTime? _selectedDate;
-  late bool _isLabelVisible;
-
-  @override
-  void initState() {
-    super.initState();
-    _nombresController = TextEditingController();
-    _apellidosController = TextEditingController();
-    _emailController = TextEditingController();
-    _passwordController = TextEditingController();
-    _confirmPasswordController = TextEditingController();
-    _isLabelVisible = true;
-  }
-
-  @override
-  void dispose() {
-    _nombresController.dispose();
-    _apellidosController.dispose();
-    _emailController.dispose();
-    _passwordController.dispose();
-    _confirmPasswordController.dispose();
-    super.dispose();
-  }
-
-  void _saveFormData() {
-    String nombres = _nombresController.text;
-    String apellidos = _apellidosController.text;
-    String email = _emailController.text;
-    String password = _passwordController.text;
-    String confirmPassword = _confirmPasswordController.text;
-    String fechaNacimiento = _selectedDate != null
-        ? '${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}'
-        : '';
-
-  }
+  String? _nombresController;
+  String? _apellidosController;
+  String? _telefonoController;
+  String? _addressController;
 
   @override
   Widget build(BuildContext context) {
@@ -77,11 +44,9 @@ class _RegistroUsuarioState extends State<RegistroUsuario> {
                 SizedBox(height: 10),
                 _buildTextField('Apellidos', _apellidosController),
                 SizedBox(height: 10),
-                _buildTextField('Correo Electrónico', _emailController),
+                _buildTextField('Telefono', _telefonoController),
                 SizedBox(height: 10),
-                _buildTextField('Contraseña', _passwordController, isPassword: true),
-                SizedBox(height: 10),
-                _buildTextField('Confirmar Contraseña', _confirmPasswordController, isPassword: true),
+                _buildTextField('Dirección', _addressController),
                 SizedBox(height: 10),
                 InkWell(
                   onTap: () {
@@ -118,7 +83,17 @@ class _RegistroUsuarioState extends State<RegistroUsuario> {
                 ),
                 SizedBox(height: 20),
                 ElevatedButton(
-                  onPressed: _saveFormData,
+                  onPressed: () async {
+                    int result = await _saveFormDataUser();
+                    if (result == 1) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => RegistroCredencialesUser(),
+                        ),
+                      );
+                    }
+                  },
                   style: ElevatedButton.styleFrom(
                     primary: Color(0xFF316C09),
                     minimumSize: Size(250, 40),
@@ -131,7 +106,7 @@ class _RegistroUsuarioState extends State<RegistroUsuario> {
                     ),
                   ),
                   child: Text(
-                    'Crear cuenta',
+                    'Siguiente',
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 20.0,
@@ -147,7 +122,8 @@ class _RegistroUsuarioState extends State<RegistroUsuario> {
     );
   }
 
-  Widget _buildTextField(String label, TextEditingController controller, {bool isPassword = false}) {
+  Widget _buildTextField(String label, String? controller,
+      {bool isPassword = false}) {
     return Container(
       width: 308,
       height: 45,
@@ -156,7 +132,17 @@ class _RegistroUsuarioState extends State<RegistroUsuario> {
         border: Border.all(color: Color(0xFF316C09), width: 5),
       ),
       child: TextField(
-        controller: controller,
+        onChanged: (value) {
+          if (label == 'Nombres') {
+            _nombresController = value;
+          } else if (label == 'Apellidos') {
+            _apellidosController = value;
+          } else if (label == 'Telefono') {
+            _telefonoController = value;
+          } else if (label == 'Dirección') {
+            _addressController = value;
+          }
+        },
         obscureText: isPassword,
         style: TextStyle(color: Color(0xFF585858), fontFamily: 'RobotoMono'),
         textAlignVertical: TextAlignVertical.top,
@@ -170,11 +156,6 @@ class _RegistroUsuarioState extends State<RegistroUsuario> {
           ),
           border: InputBorder.none,
         ),
-        onChanged: (value) {
-          setState(() {
-            _isLabelVisible = value.isEmpty;
-          });
-        },
       ),
     );
   }
@@ -190,6 +171,29 @@ class _RegistroUsuarioState extends State<RegistroUsuario> {
       setState(() {
         _selectedDate = pickedDate;
       });
+    }
+  }
+
+  Future<int> _saveFormDataUser() async {
+    final usersModel = UsersModel.instance;
+    print("entrando a guardar");
+    try {
+      usersModel.users.Name = _nombresController ?? '';
+      usersModel.users.LastName = _apellidosController ?? '';
+      usersModel.users.Phone = _telefonoController ?? '';
+      usersModel.users.Address = _addressController ?? '';
+      usersModel.users.FechaNacimiento = _selectedDate;
+
+      print('Nombres: $_nombresController');
+      print('Apellidos: $_apellidosController');
+      print('Teléfono: $_telefonoController');
+      print('Dirección: $_addressController');
+      print('Fecha de Nacimiento: $_selectedDate');
+
+      return 1; // Operación exitosa
+    } catch (e) {
+      print(e);
+      return 0; // Operación fallida
     }
   }
 }

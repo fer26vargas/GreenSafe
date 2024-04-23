@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:visual1/SeccionUsuarios/vistaPrincipal.dart';
 import '../Models/RecyclerModel.dart';
-import '../SeccionReciclador/inicioReciclador.dart';
 import 'DocumentoIdentidad.dart';
 import 'RegistroBascula.dart';
 import 'RegistroCredenciales.dart';
@@ -145,7 +145,7 @@ class _RegistroRecicladorState extends State<RegistroReciclador> {
     print('Datos enviados: ${recyclerModel.recycler.toJson()}');
 
     const apiUrl =
-        'https://d2d1-191-104-228-171.ngrok-free.app/RegisterRecycler';
+        'https://3a01-190-121-149-118.ngrok-free.app/RegisterRecycler';
     final uri = Uri.parse(apiUrl);
 
     try {
@@ -158,7 +158,7 @@ class _RegistroRecicladorState extends State<RegistroReciclador> {
       if (response.statusCode == 200) {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => InicioPrincipalReciclador()),
+          MaterialPageRoute(builder: (context) => VistaPrincipal()),
         );
         return true;
       } else {
